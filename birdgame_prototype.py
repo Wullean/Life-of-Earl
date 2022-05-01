@@ -17,6 +17,8 @@ Birdlife = pygame.display.set_mode((Screen_Width, Screen_Height))
 Birdlife.fill(White)
 pygame.display.set_caption("Birds: ")
 
+print(Birdlife.get_rect())
+
 def get_ms():
     return int(time.time_ns() / 1000000)
 class Bird():
@@ -34,6 +36,7 @@ class Bird():
         self.y = Screen_Height / 2 + random.randint(-200, 200)
         self.direction = pygame.Rect(0,0,0,0)
         self.LastDirectionChange = get_ms() - random.randint(0, 10)
+        self.MSNextChange = 0
     
     def set_position(self, x, y):
         self.x = x
@@ -43,22 +46,21 @@ class Bird():
         
         self.x += self.direction.x
         self.y += self.direction.y
+        if not Birdlife.get_rect().colliderect(self.to_rect()):
+            birds.remove(self)
 
-        if get_ms() - self.LastDirectionChange > 1000:
+        if get_ms() - self.LastDirectionChange > self.MSNextChange:
+
             self.direction.x = random.randint(-2, 2)
             self.direction.y = random.randint(-2, 2)
             self.LastDirectionChange = get_ms()
-    
+            self.MSNextChange = random.randint(0, 3000)
     def move(self):
         
         if self.get_age() < 100000:
             self.rdirec()
         elif self.get_age() < 110000:
             self.y+=20
-        else:
-            birds.remove(self)
-            print("ded")
-            print(self.get_age())
 
     def render(self):
         Birdlife.blit(self.image, self.to_rect())
@@ -74,7 +76,7 @@ class Bird():
 
             self.cooldown = get_ms()
 
-            if(random.randint(0,5) == 1):
+            if(random.randint(0,3) == 1):
                 Earl = Bird()
                 birds.append(Earl)
                 Earl.set_position(self.x, self.y)
