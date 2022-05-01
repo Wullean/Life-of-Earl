@@ -79,14 +79,14 @@ class Bird():
                 return
 
             if self.x < Screen_Width / 2:
-                self.direction.x = 15
+                self.direction.x = random.randint(5, 25)
             else:
-                self.direction.x = -15
+                self.direction.x = -random.randint(5, 25)
             
             if self.y < Screen_Height / 2:
-                self.direction.y = 15
+                self.direction.y = random.randint(5, 25)
             else:
-                self.direction.y = -15
+                self.direction.y = -random.randint(5, 25)
 
         elif get_ms() - self.LastDirectionChange > self.MSNextChange:
 
