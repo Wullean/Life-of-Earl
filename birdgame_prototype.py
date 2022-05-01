@@ -182,6 +182,7 @@ while Running:
 
     if len(birds) == 0:
         Jumpscare = True
+        time.sleep(10)
     
     if Jumpscare == True:
         birds.append(Bird())
