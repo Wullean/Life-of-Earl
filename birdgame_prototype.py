@@ -1,4 +1,5 @@
 from calendar import c
+from locale import locale_encoding_alias
 from re import X
 import pygame, sys, random, time
 
@@ -138,15 +139,16 @@ for i in range(10):
     birds.append(Bird())
 
 movecounter = 0
+Running = True
+Jumpscare = False
 
-while True:
+while Running:
     
     Birdlife.fill(White)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            Running = False
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
             Earl = Bird()
@@ -177,3 +179,11 @@ while True:
     
     pygame.display.update()
     FramePerSec.tick(FPS)
+
+    if len(birds) == 0:
+        Jumpscare = True
+    
+    if Jumpscare == True:
+        birds.append(Bird())
+        if len(birds) > 250:
+            Running = False
