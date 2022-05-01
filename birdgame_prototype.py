@@ -1,4 +1,5 @@
 from calendar import c
+from re import X
 import pygame, sys, random, time
 
 pygame.init()
@@ -17,12 +18,31 @@ Birdlife = pygame.display.set_mode((Screen_Width, Screen_Height))
 Birdlife.fill(White)
 pygame.display.set_caption("Birds: ")
 birdsprite = pygame.image.load("BirdM1.png")
-
+boomsprite = pygame.image.load("boom.png")
+rip = pygame.image.load("mrsanders.png")
+boomer = []
 
 print(Birdlife.get_rect())
 
 def get_ms():
     return int(time.time_ns() / 1000000)
+
+class Boom():
+    def __init__(self, x, y):
+
+        self.x = x
+        self.y = y
+        self.boomtime = get_ms()
+    
+    def render(self):
+
+        Birdlife.blit(boomsprite, (self.x, self.y,0, 0))
+
+    def boomremoval(self):
+        if get_ms() - self.boomtime > 1500:
+            boomer.remove(self)
+
+
 class Bird():
 
     def to_rect(self):
@@ -78,12 +98,16 @@ class Bird():
     def move(self):
         
         if self.get_age() > 100000:
-            self.direction.y = 20
+            self.direction.y = 10
             self.direction.x = 0
         self.rdirec()
 
     def render(self):
-        Birdlife.blit(self.image, self.to_rect())
+
+        if(self.get_age() < 100000):
+            Birdlife.blit(self.image, self.to_rect())
+        else:
+            Birdlife.blit(rip, self.to_rect())
 
     def get_age(self):
         return get_ms() - self.birthtime
@@ -105,6 +129,8 @@ class Bird():
                     pass
                 else:
                     other.birthtime = get_ms() - 100000
+                    if abs(self.direction.x) > 10 or abs(self.direction.y) > 10:
+                        boomer.append(Boom(other.x, other.y))
                        
 birds = []
 
@@ -137,6 +163,11 @@ while True:
             if bird is not entity and bird.to_rect().colliderect(entity.to_rect()):
                 bird.collide(entity)
     
+    for entity in boomer:
+
+        entity.render()
+        entity.boomremoval()
+
     pygame.display.set_caption("Birds: " + str(len(birds)))
 
 
