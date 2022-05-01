@@ -15,8 +15,10 @@ Gamespeed = 1
 
 Birdlife = pygame.display.set_mode((Screen_Width, Screen_Height))
 Birdlife.fill(White)
-pygame.display.set_caption("Birds")
+pygame.display.set_caption("Birds: ")
 
+def get_ms():
+    return int(time.time_ns() / 1000000)
 class Bird():
 
     def to_rect(self):
@@ -25,9 +27,13 @@ class Bird():
 
     def __init__(self):
         super().__init__()
+        self.birthtime = get_ms()
+        self.cooldown = get_ms()
         self.image = pygame.image.load("BirdM1.png")
         self.x = Screen_Width / 2 + random.randint(-200, 200)
         self.y = Screen_Height / 2 + random.randint(-200, 200)
+        self.direction = pygame.Rect(0,0,0,0)
+        self.LastDirectionChange = get_ms() - random.randint(0, 10)
     
     def set_position(self, x, y):
         self.x = x
@@ -35,18 +41,48 @@ class Bird():
 
     def rdirec(self):
         
-        self.x = self.x + random.randint(-5, 5)
-        self.y = self.y + random.randint(-5, 5)
+        self.x += self.direction.x
+        self.y += self.direction.y
+
+        if get_ms() - self.LastDirectionChange > 1000:
+            self.direction.x = random.randint(-2, 2)
+            self.direction.y = random.randint(-2, 2)
+            self.LastDirectionChange = get_ms()
     
     def move(self):
         
-        self.rdirec()
+        if self.get_age() < 100000:
+            self.rdirec()
+        elif self.get_age() < 110000:
+            self.y+=20
+        else:
+            birds.remove(self)
+            print("ded")
+            print(self.get_age())
 
     def render(self):
         Birdlife.blit(self.image, self.to_rect())
 
+    def get_age(self):
+        return get_ms() - self.birthtime
+    
+    def collide(self, other):
+        if self.get_age() > 100000:
+            return
+        
+        if self.get_age() >= 0000 and get_ms() - self.cooldown > 10000:
+
+            self.cooldown = get_ms()
+
+            if(random.randint(0,5) == 1):
+                Earl = Bird()
+                birds.append(Earl)
+                Earl.set_position(self.x, self.y)
+        
 birds = []
-birds.append(Bird())
+
+for i in range(50):
+    birds.append(Bird())
 
 movecounter = 0
 
@@ -69,12 +105,13 @@ while True:
 
         entity.render()
         entity.move()
-    
+        
         for bird in birds:
             if bird is not entity and bird.to_rect().colliderect(entity.to_rect()):
-                print("bruh")
-                birds.remove(bird)
-                birds.remove(entity)
+                bird.collide(entity)
+    
+    pygame.display.set_caption("Birds: " + str(len(birds)))
+
 
     movecounter = movecounter + random.randint(0, 10)
 
