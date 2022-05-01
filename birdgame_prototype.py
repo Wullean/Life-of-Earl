@@ -16,6 +16,8 @@ Gamespeed = 1
 Birdlife = pygame.display.set_mode((Screen_Width, Screen_Height))
 Birdlife.fill(White)
 pygame.display.set_caption("Birds: ")
+birdsprite = pygame.image.load("BirdM1.png")
+
 
 print(Birdlife.get_rect())
 
@@ -31,7 +33,7 @@ class Bird():
         super().__init__()
         self.birthtime = get_ms()
         self.cooldown = get_ms()
-        self.image = pygame.image.load("BirdM1.png")
+        self.image = birdsprite.copy()
         self.x = Screen_Width / 2 + random.randint(-200, 200)
         self.y = Screen_Height / 2 + random.randint(-200, 200)
         self.direction = pygame.Rect(0,0,0,0)
@@ -46,21 +48,39 @@ class Bird():
         
         self.x += self.direction.x
         self.y += self.direction.y
-        if not Birdlife.get_rect().colliderect(self.to_rect()):
-            birds.remove(self)
+        if not Birdlife.get_rect().contains(self.to_rect()):
+            
+            self.LastDirectionChange = get_ms()
+            self.MSNextChange = random.randint(500, 3500)
 
-        if get_ms() - self.LastDirectionChange > self.MSNextChange:
+            if(self.get_age() > 100000):
+                birds.remove(self)
+                return
+
+            if self.x < Screen_Width / 2:
+                self.direction.x = 15
+            else:
+                self.direction.x = -15
+            
+            if self.y < Screen_Height / 2:
+                self.direction.y = 15
+            else:
+                self.direction.y = -15
+
+        elif get_ms() - self.LastDirectionChange > self.MSNextChange:
 
             self.direction.x = random.randint(-2, 2)
             self.direction.y = random.randint(-2, 2)
             self.LastDirectionChange = get_ms()
             self.MSNextChange = random.randint(0, 3000)
+            self.image = pygame.transform.rotate(birdsprite, random.randint(0,90) -25)
+
     def move(self):
         
-        if self.get_age() < 100000:
-            self.rdirec()
-        elif self.get_age() < 110000:
-            self.y+=20
+        if self.get_age() > 100000:
+            self.direction.y = 20
+            self.direction.x = 0
+        self.rdirec()
 
     def render(self):
         Birdlife.blit(self.image, self.to_rect())
@@ -76,14 +96,19 @@ class Bird():
 
             self.cooldown = get_ms()
 
-            if(random.randint(0,3) == 1):
+            if(random.randint(0,2) == 1):
                 Earl = Bird()
                 birds.append(Earl)
                 Earl.set_position(self.x, self.y)
-        
+            elif self.get_age() > other.get_age():
+                if other.get_age() > 100000:
+                    pass
+                else:
+                    other.birthtime = get_ms() - 100000
+                       
 birds = []
 
-for i in range(50):
+for i in range(10):
     birds.append(Bird())
 
 movecounter = 0
