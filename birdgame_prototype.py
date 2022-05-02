@@ -7,7 +7,6 @@ pygame.init()
 
 FPS = 60
 FramePerSec = pygame.time.Clock()
-
 White = (255, 255, 255)
 Black = (0, 0, 0)
 
@@ -19,14 +18,19 @@ Birdlife = pygame.display.set_mode((Screen_Width, Screen_Height))
 Birdlife.fill(White)
 pygame.display.set_caption("Birds: ")
 birdsprite = pygame.image.load("BirdM1.png")
+female = pygame.image.load("BirdF1.png")
 boomsprite = pygame.image.load("boom.png")
 rip = pygame.image.load("mrsanders.png")
 boomer = []
+gcd = 0
 
 print(Birdlife.get_rect())
 
 def get_ms():
     return int(time.time_ns() / 1000000)
+
+def set_gender():
+    return random.randint(0,1)
 
 class Boom():
     def __init__(self, x, y):
@@ -51,6 +55,7 @@ class Bird():
         return pygame.Rect(self.x, self.y, self.image.get_width() , self.image.get_height())
 
     def __init__(self):
+
         super().__init__()
         self.birthtime = get_ms()
         self.cooldown = get_ms()
@@ -60,6 +65,7 @@ class Bird():
         self.direction = pygame.Rect(0,0,0,0)
         self.LastDirectionChange = get_ms() - random.randint(0, 10)
         self.MSNextChange = 0
+        self.gender = set_gender()
     
     def set_position(self, x, y):
         self.x = x
@@ -106,9 +112,13 @@ class Bird():
     def render(self):
 
         if(self.get_age() < 100000):
-            Birdlife.blit(self.image, self.to_rect())
+            if(self.gender == 1):
+                Birdlife.blit(female, self.to_rect())
+            else:
+                Birdlife.blit(self.image, self.to_rect())
         else:
             Birdlife.blit(rip, self.to_rect())
+        
 
     def get_age(self):
         return get_ms() - self.birthtime
@@ -117,22 +127,40 @@ class Bird():
         if self.get_age() > 100000:
             return
         
-        if self.get_age() >= 0000 and get_ms() - self.cooldown > 10000:
+        if self.get_age() >= 0 and get_ms() - self.cooldown > 10000:
 
             self.cooldown = get_ms()
+        
+            if len(birds) < 15:
 
-            if(random.randint(0,2) == 1):
-                Earl = Bird()
-                birds.append(Earl)
-                Earl.set_position(self.x, self.y)
-            elif self.get_age() > other.get_age():
-                if other.get_age() > 100000:
-                    pass
-                else:
-                    other.birthtime = get_ms() - 100000
-                    if abs(self.direction.x) > 10 or abs(self.direction.y) > 10:
-                        boomer.append(Boom(other.x, other.y))
-                       
+                if(random.randint(0,1) == 1):
+                    if self.gender != other.gender:
+                        Earl = Bird()
+                        birds.append(Earl)
+                        Earl.set_position(self.x, self.y)
+                elif self.get_age() > other.get_age():
+                    if other.get_age() > 100000:
+                        pass
+                    elif self.gender == other.gender:
+                        other.birthtime = get_ms() - 100000
+                        if abs(self.direction.x) > 10 or abs(self.direction.y) > 10:
+                            boomer.append(Boom(other.x, other.y))
+            
+            else:
+
+                if(random.randint(0,2) == 1):
+                    if self.gender != other.gender:
+                        Earl = Bird()
+                        birds.append(Earl)
+                        Earl.set_position(self.x, self.y)
+                elif self.get_age() > other.get_age():
+                    if other.get_age() > 100000:
+                        pass
+                    elif self.gender == other.gender:
+                        other.birthtime = get_ms() - 100000
+                        if abs(self.direction.x) > 10 or abs(self.direction.y) > 10:
+                            boomer.append(Boom(other.x, other.y))
+                        
 birds = []
 
 for i in range(10):
